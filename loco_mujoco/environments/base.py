@@ -110,7 +110,7 @@ class LocoEnv(MultiMuJoCo):
         super().__init__(xml_handles, action_spec, observation_spec, gamma=gamma, horizon=horizon,
                          n_substeps=n_substeps, n_intermediate_steps=n_intermediate_steps, timestep=timestep,
                          collision_groups=collision_groups, default_camera_mode=default_camera_mode, **viewer_params)
-
+        
         # specify reward function
         self._reward_function = self._get_reward_function(reward_type, reward_params)
 
@@ -128,7 +128,6 @@ class LocoEnv(MultiMuJoCo):
 
         # setup a running average window for the mean ground forces
         self.mean_grf = self._setup_ground_force_statistics()
-
         if traj_params:
             self.trajectories = None
             self.load_trajectory(traj_params)
@@ -150,10 +149,8 @@ class LocoEnv(MultiMuJoCo):
                 trajectory ranges are violated.
 
         """
-
         if self.trajectories is not None:
             warnings.warn("New trajectories loaded, which overrides the old ones.", RuntimeWarning)
-
         self.trajectories = Trajectory(keys=self.get_all_observation_keys(),
                                        low=self.info.observation_space.low,
                                        high=self.info.observation_space.high,
@@ -292,7 +289,7 @@ class LocoEnv(MultiMuJoCo):
         Returns a list of indices corresponding to the respective key.
 
         """
-
+        
         idx = self.obs_helper.obs_idx_map[key]
 
         # shift by 2 to account for deleted x and y
@@ -423,7 +420,6 @@ class LocoEnv(MultiMuJoCo):
             recorder_params (dict): Dictionary containing the recorder parameters.
 
         """
-
         assert self.trajectories is not None
 
         if record:
@@ -642,7 +638,6 @@ class LocoEnv(MultiMuJoCo):
             Reward function.
 
         """
-
         if reward_type == "custom":
             reward_func = CustomReward(**reward_params)
         elif reward_type == "target_velocity":
@@ -655,6 +650,8 @@ class LocoEnv(MultiMuJoCo):
             assert len(x_idx) == 1
             x_idx = x_idx[0]
             reward_func = PosReward(pos_idx=x_idx)
+        elif reward_type == "fly_pos":
+            x_idx = self.get_obs_idx("")
         elif reward_type is None:
             reward_func = NoReward()
         else:
